@@ -68,3 +68,4 @@ export const transferFunds = async (data: { recipientId: string; amount: number 
         throw error;
     }
 };
+
