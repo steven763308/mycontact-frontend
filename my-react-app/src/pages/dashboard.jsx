@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import ewalletService from '../services/ewalletService';
 
 const Dashboard = () => {
     const [balance, setBalance] = useState(0);
@@ -7,10 +8,10 @@ const Dashboard = () => {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/ewallet/dashboard');
-            const newBalance = typeof response.data.balance === 'number' ? response.data.balance : 0;
+            const response = await ewalletService.getBalance();
+            const newBalance = typeof response.balance === 'number' ? response.balance : 0;
             setBalance(newBalance);
-            setTransactions(response.data.transactions || []);
+            setTransactions(response.transactions || []);
         } catch (error) {
             console.error('Error fetching data:', error);
             setBalance(0); // Reset to default if error
@@ -24,7 +25,7 @@ const Dashboard = () => {
 
     const addFunds = async (amount) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/ewallet/add-funds', { amount });
+            const response = await axios.post(addFunds, { amount });
             setBalance(response.data.newBalance);
         } catch (error) {
             console.error('Error adding funds:', error);
@@ -33,7 +34,7 @@ const Dashboard = () => {
 
     const subtractFunds = async (amount) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/ewallet/subtract-funds', { amount });
+            const response = await axios.post(subtractFunds, { amount });
             setBalance(response.data.newBalance);
         } catch (error) {
             console.error('Error subtracting funds:', error);
@@ -42,7 +43,7 @@ const Dashboard = () => {
 
     const transferFunds = async (amount, recipientId) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/ewallet/transfer-funds', { amount, recipientId });
+            const response = await axios.post(transferFunds, { amount, recipientId });
             setBalance(response.data.newBalance);
             fetchData();
         } catch (error) {

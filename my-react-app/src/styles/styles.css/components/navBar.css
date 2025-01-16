@@ -1,0 +1,46 @@
+/* NavBar.css */
+nav {
+    background-color: #004d40; /* Teal background */
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center; /* Center the navigation menu horizontally */
+}
+
+nav ul {
+    list-style: none; /* Removes default list styling */
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+nav ul li {
+    margin-right: 20px; /* Space between menu items */
+}
+
+nav ul li:last-child {
+    margin-right: 0; /* No margin on the right of the last item */
+}
+
+nav a {
+    color: #ffffff; /* White text color for readability */
+    text-decoration: none; /* Remove underline from links */
+    font-size: 16px;
+    font-weight: bold;
+}
+
+nav a:hover, nav a.active {
+    color: #b2dfdb; /* Lighter teal color on hover or active */
+}
+
+nav button {
+    padding: 8px 16px;
+    background-color: #00897b; /* Slightly darker teal background for button */
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+}
+
+nav button:hover {
+    background-color: #00695c; /* Even darker teal on hover */
+}
