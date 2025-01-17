@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
     baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}` //token
+        Authorization: `Bearer ${token}` //token include in headers
     },
     withCredentials: true
 })
@@ -21,16 +21,14 @@ const getBalance = async () => {
 
 /**
  * Add funds to the user's e-wallet.
- * @param data - Object containing the amount to add.
+ * @param amount - Object containing the amount to add.
  * @returns The updated balance after adding funds.
  */
 const addFunds = async (amount) => {
     try {
-        const response = await axios.post(`${API_URL}/addFunds`, {amount}, {
-            withCredentials: true, // Ensures cookies are sent for authentication
-        });
+        const response = await axiosInstance.post(`/addFunds`, {amount});
         return response.data; // The backend is expected to return the new balance
-    } catch (error) {
+    }catch(error){
         console.error('Error adding funds:', error);
         throw error; // Re-throw to let the caller handle it
     }
@@ -38,14 +36,12 @@ const addFunds = async (amount) => {
 
 /**
  * Subtract funds from the user's e-wallet.
- * @param data - Object containing the amount to subtract.
+ * @param amount - Object containing the amount to subtract.
  * @returns The updated balance after subtracting funds.
  */
 const subtractFunds = async (amount) => {
     try {
-        const response = await axios.post(`${API_URL}/subtractFunds`, {amount}, {
-            withCredentials: true,
-        });
+        const response = await axiosInstance.post(`/subtractFunds`, {amount});
         return response.data; // The backend is expected to return the new balance
     } catch (error) {
         console.error('Error subtracting funds:', error);
@@ -55,14 +51,13 @@ const subtractFunds = async (amount) => {
 
 /**
  * Transfer funds to another user.
- * @param data - Object containing the recipient's ID and the amount to transfer.
+ * @param amount - Object containing the recipient's ID and the amount to transfer.
+ * @param recipientId - The recipient's ID.
  * @returns The updated balance after the transfer.
  */
 const transferFunds = async (amount, recipientId) => {
     try {
-        const response = await axios.post(`${API_URL}/transferFunds`, {amount, recipientId}, {
-            withCredentials: true,
-        });
+        const response = await axiosInstance.post(`/transferFunds`, {amount, recipientId});
         return response.data; // The backend is expected to return the new balance
     } catch (error) {
         console.error('Error transferring funds:', error);
@@ -76,9 +71,7 @@ const transferFunds = async (amount, recipientId) => {
  */
 const getTransactionHistory = async () => {
     try {
-        const response = await axios.get(`${API_URL}/transactionHistory`, {
-            withCredentials: true,
-        });
+        const response = await axiosInstance.get(`/transactions`);
         return response.data; // The backend should return an array of transactions
     } catch (error) {
         console.error('Error fetching transaction history:', error);

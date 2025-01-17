@@ -1,21 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ewalletService from '../services/ewalletService';
+import { use } from 'react';
 
 const Dashboard = () => {
+    //call api only after the token is stored
+    const [isAuth, setIsAuth] = useState(false); //state track auth status
+
     const [balance, setBalance] = useState(0);
     const [amount, setAmount] = useState('');
     const [transactions, setTransactions] = useState([]);
 
+    //auth check and data fetch
     useEffect(() => {
-        fetchData();
-    }, []);
+        const token = localStorage.getItem('token');
+        if(token){
+            console.log('Token found, user is authenticated');
+            setIsAuth(true); //set auth to true to trigger data fetch
+        }
+    });
+
+    //data fetching effect
+    useEffect(() => {
+        if(isAuth){
+            console.log('Dashboard mounted, fetching data...');
+            fetchData();
+        }
+    }, [isAuth]); //dependency on isAuth
 
     const fetchData = async () => {
+        console.log('Attempting to fetch balance and transactions...');
         try {
             const balanceData = await ewalletService.getBalance();
+            console.log('Balance fetched:', balanceData);
             setBalance(balanceData.balance);
+
             const transactionsData = await ewalletService.getTransactionHistory();
+            console.log('Transactions fetched:', transactionsData);
             setTransactions(transactionsData.transactions);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -27,35 +48,39 @@ const Dashboard = () => {
     };
 
     const addFunds = async () => {
-        if(amount > 0){
+        if (amount > 0) {
+            console.log('Adding funds:', amount);
             try {
                 const newBalance = await ewalletService.addFunds(Number(amount));
+                console.log('New balance after adding funds:', newBalance);
                 setBalance(newBalance.balance);
-                fetchData(); //refresh data
+                fetchData(); // Refresh data
             } catch (error) {
                 console.error('Error adding funds:', error);
             }
         }
-        
     };
 
     const subtractFunds = async () => {
-        if(amount > 0){
+        if (amount > 0) {
+            console.log('Subtracting funds:', amount);
             try {
                 const newBalance = await ewalletService.subtractFunds(Number(amount));
+                console.log('New balance after subtracting funds:', newBalance);
                 setBalance(newBalance.newBalance);
-                fetchData(); //refresh data
+                fetchData(); // Refresh data
             } catch (error) {
                 console.error('Error subtracting funds:', error);
             }
         }
     };
 
-    //transfer funds (this logic should not be here.)
     const transferFunds = async (amount, recipientId) => {
+        console.log('Transferring funds:', amount, 'to recipient ID:', recipientId);
         try {
-            const response = await axios.post(transferFunds, { amount, recipientId });
-            setBalance(response.data.response.balance || 0);
+            const response = await ewalletService.transferFunds(amount, recipientId);
+            console.log('New balance after transferring funds:', response);
+            setBalance(response.data.newBalance);
             fetchData();
         } catch (error) {
             console.error('Error transferring funds:', error);

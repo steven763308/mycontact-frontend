@@ -14,11 +14,18 @@ const api = axios.create({
 api.interceptors.request.use(
     config => {
         const token = localStorage.getItem("token");
-        console.log("Adding token to headers:", token); // Log token being added to headers
+        console.log("Retrieved token:", token);  // This will confirm if the token is null or a valid string
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
+            console.log("Headers after adding token:", config.headers); // Check what headers are being sent
+        } else {
+            console.warn("No token available, sending request without authorization.");
         }
         return config;
+    },
+    error => {
+        console.error('Error on sending request:', error);
+        return Promise.reject(error);
     }
 );
 
@@ -30,7 +37,8 @@ export const authService = {
         console.log("Login response:", response); // Log response from login attempt
         if (response.data.accessToken) {
             localStorage.setItem("token", response.data.accessToken);
-            console.log("Token stored:", response.data.accessToken); // Log token storage
+            //console.log("Token stored:", response.data.accessToken); // Log token storage
+            console.log("Token stored:", localStorage.getItem("token")); //log the token just been stored
         }
         return response.data;
     },
