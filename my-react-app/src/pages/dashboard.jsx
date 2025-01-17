@@ -6,7 +6,6 @@ import { use } from 'react';
 const Dashboard = () => {
     //call api only after the token is stored
     const [isAuth, setIsAuth] = useState(false); //state track auth status
-
     const [balance, setBalance] = useState(0);
     const [amount, setAmount] = useState('');
     const [transactions, setTransactions] = useState([]);
@@ -18,7 +17,7 @@ const Dashboard = () => {
             console.log('Token found, user is authenticated');
             setIsAuth(true); //set auth to true to trigger data fetch
         }
-    });
+    }, []); // dependency array ensures it only runs once
 
     //data fetching effect
     useEffect(() => {
@@ -32,12 +31,12 @@ const Dashboard = () => {
         console.log('Attempting to fetch balance and transactions...');
         try {
             const balanceData = await ewalletService.getBalance();
-            console.log('Balance fetched:', balanceData);
-            setBalance(balanceData.balance);
-
             const transactionsData = await ewalletService.getTransactionHistory();
+
+            setBalance(Number(balanceData.balance) || 0); //ensure numeric value
+            console.log('Balance fetched:', balanceData);
+            setTransactions(transactionsData.transactions || []); //fallback to empty array if undefined
             console.log('Transactions fetched:', transactionsData);
-            setTransactions(transactionsData.transactions);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -47,31 +46,40 @@ const Dashboard = () => {
         setAmount(e.target.value);
     };
 
+    const validateAmount = (value) =>{
+        const num = Number(value);
+        return !isNaN(num) && num > 0;
+    };
+
     const addFunds = async () => {
-        if (amount > 0) {
+        if (validateAmount(amount)) {
             console.log('Adding funds:', amount);
             try {
                 const newBalance = await ewalletService.addFunds(Number(amount));
                 console.log('New balance after adding funds:', newBalance);
-                setBalance(newBalance.balance);
+                setBalance(Number(newBalance.balance) || balance);
                 fetchData(); // Refresh data
             } catch (error) {
                 console.error('Error adding funds:', error);
             }
+        }else{
+            console.warn('Invalid amount entered.');
         }
     };
 
     const subtractFunds = async () => {
-        if (amount > 0) {
+        if (validateAmount(amount)) {
             console.log('Subtracting funds:', amount);
             try {
                 const newBalance = await ewalletService.subtractFunds(Number(amount));
                 console.log('New balance after subtracting funds:', newBalance);
-                setBalance(newBalance.newBalance);
+                setBalance(Number(newBalance.newBalance) || balance);
                 fetchData(); // Refresh data
             } catch (error) {
                 console.error('Error subtracting funds:', error);
             }
+        }else{
+            console.warn('Invalid amount entered.');
         }
     };
 
@@ -86,6 +94,8 @@ const Dashboard = () => {
             console.error('Error transferring funds:', error);
         }
     };
+
+    //const transactHistory
 
     return (
         <div className="dashboard">
@@ -107,7 +117,7 @@ const Dashboard = () => {
             </div>
 
             <div className="recent-transactions">
-                <h3>Recent Transactions</h3>
+                <h3>Recent Transactions History</h3>
                 <ul>
                     {transactions.map((transaction, index) => (
                         <li key={index}>

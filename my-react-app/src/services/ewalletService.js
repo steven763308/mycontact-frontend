@@ -9,15 +9,36 @@ const axiosInstance = axios.create({
     baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}` //token include in headers
     },
-    withCredentials: true
-})
+    withCredentials: true,
+});
+
+// Add a request interceptor to include the token dynamically
+axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    } else {
+        console.warn('Token is null or undefined');
+    }
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
 
 const getBalance = async () => {
-    const response = await axios.get(`${API_URL}/balance`);
+    // Log to check if the token exists in localStorage at the time of request
+    const token = localStorage.getItem('token');
+    if (token) {
+        console.log('Token exists:', token);
+    } else {
+        console.log('No token found');
+    }
+
+    const response = await axiosInstance.get(`/balance`);
     return response.data;
 };
+
 
 /**
  * Add funds to the user's e-wallet.

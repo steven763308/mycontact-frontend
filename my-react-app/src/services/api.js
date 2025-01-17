@@ -14,12 +14,15 @@ const api = axios.create({
 api.interceptors.request.use(
     config => {
         const token = localStorage.getItem("token");
-        console.log("Retrieved token:", token);  // This will confirm if the token is null or a valid string
+        // This will confirm if the token is null or a valid string
+        console.log("Retrieved token:", token);  
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
-            console.log("Headers after adding token:", config.headers); // Check what headers are being sent
+            // Check what headers are being sent
+            console.log("Headers after adding token:", config.headers); 
         } else {
-            console.warn("No token available, sending request without authorization.");
+            //means after login if no token in headers
+            console.warn("No token available, sending request without authorization."); 
         }
         return config;
     },
