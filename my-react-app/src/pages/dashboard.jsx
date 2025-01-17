@@ -4,47 +4,58 @@ import ewalletService from '../services/ewalletService';
 
 const Dashboard = () => {
     const [balance, setBalance] = useState(0);
+    const [amount, setAmount] = useState('');
     const [transactions, setTransactions] = useState([]);
-
-    const fetchData = async () => {
-        try {
-            const response = await ewalletService.getBalance();
-            const newBalance = typeof response.balance === 'number' ? response.balance : 0;
-            setBalance(newBalance);
-            setTransactions(response.transactions || []);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            setBalance(0); // Reset to default if error
-            setTransactions([]);
-        }
-    };
 
     useEffect(() => {
         fetchData();
     }, []);
 
-    const addFunds = async (amount) => {
+    const fetchData = async () => {
         try {
-            const response = await axios.post(addFunds, { amount });
-            setBalance(response.data.newBalance);
+            const balanceData = await ewalletService.getBalance();
+            setBalance(balanceData.balance);
+            const transactionsData = await ewalletService.getTransactionHistory();
+            setTransactions(transactionsData.transactions);
         } catch (error) {
-            console.error('Error adding funds:', error);
+            console.error('Error fetching data:', error);
         }
     };
 
-    const subtractFunds = async (amount) => {
-        try {
-            const response = await axios.post(subtractFunds, { amount });
-            setBalance(response.data.newBalance);
-        } catch (error) {
-            console.error('Error subtracting funds:', error);
+    const handleAmountChange = (e) => {
+        setAmount(e.target.value);
+    };
+
+    const addFunds = async () => {
+        if(amount > 0){
+            try {
+                const newBalance = await ewalletService.addFunds(Number(amount));
+                setBalance(newBalance.balance);
+                fetchData(); //refresh data
+            } catch (error) {
+                console.error('Error adding funds:', error);
+            }
+        }
+        
+    };
+
+    const subtractFunds = async () => {
+        if(amount > 0){
+            try {
+                const newBalance = await ewalletService.subtractFunds(Number(amount));
+                setBalance(newBalance.newBalance);
+                fetchData(); //refresh data
+            } catch (error) {
+                console.error('Error subtracting funds:', error);
+            }
         }
     };
 
+    //transfer funds (this logic should not be here.)
     const transferFunds = async (amount, recipientId) => {
         try {
             const response = await axios.post(transferFunds, { amount, recipientId });
-            setBalance(response.data.newBalance);
+            setBalance(response.data.response.balance || 0);
             fetchData();
         } catch (error) {
             console.error('Error transferring funds:', error);
@@ -56,19 +67,27 @@ const Dashboard = () => {
             <h1>Dashboard</h1>
             <p>Welcome to your eWallet Dashboard!</p>
             <div className="balance">
-                <h2>Your Balance</h2>
-                <p>${typeof balance === 'number' ? balance.toFixed(2) : '0.00'}</p>
+                <h2>Your Balance:</h2>
+                <p>${balance.toFixed(2)}</p>
             </div>
             <div className="actions">
-                <button onClick={() => addFunds(100)}>Add $100</button>
-                <button onClick={() => subtractFunds(50)}>Subtract $50</button>
-                <button onClick={() => transferFunds(25, 2)}>Transfer $25 to User #2</button>
+                <input
+                    type="number"
+                    value={amount}
+                    onChange={handleAmountChange}
+                    placeholder="Enter amount"
+                />
+                <button onClick={addFunds}>Topup Funds</button>
+                <button onClick={subtractFunds}>Deduct Funds</button>
             </div>
+
             <div className="recent-transactions">
                 <h3>Recent Transactions</h3>
                 <ul>
                     {transactions.map((transaction, index) => (
-                        <li key={index}>{transaction.description} - ${transaction.amount}</li>
+                        <li key={index}>
+                            {transaction.description} - ${transaction.amount.toFixed(2)}
+                        </li>
                     ))}
                 </ul>
             </div>

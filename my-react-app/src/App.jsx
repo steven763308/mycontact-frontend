@@ -4,6 +4,7 @@ import Dashboard from './pages/dashboard';
 import Transfer from './pages/transfer';
 import Profile from './pages/profile';
 import Login from './pages/login';
+import Register from './pages/register';
 import NavBar from './components/navBar'; // Import NavBar component
 
 const App = () => {
@@ -14,6 +15,7 @@ const App = () => {
                 <NavBar />
                 <Routes>
                     <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/transfer" element={<Transfer />} />
                     <Route path="/profile" element={<Profile />} />

@@ -5,7 +5,7 @@ const NavBar = () => {
     const location = useLocation(); // Hook to access the current route location
 
     // Do not display NavBar on the login page
-    if (location.pathname === '/login') {
+    if (location.pathname === '/login' || location.pathname === '/register') {
         return null;
     }
 
