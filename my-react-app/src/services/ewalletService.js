@@ -39,6 +39,11 @@ const getBalance = async () => {
     return response.data;
 };
 
+//create wallet
+const createWallet = async () => {
+    const response = await axiosInstance.post(`/create`);
+    return response.data;
+}
 
 /**
  * Add funds to the user's e-wallet.
@@ -102,6 +107,7 @@ const getTransactionHistory = async () => {
 
 export default{
     getBalance,
+    createWallet,
     addFunds,
     subtractFunds,
     transferFunds,

@@ -9,38 +9,44 @@ const Dashboard = () => {
     const [balance, setBalance] = useState(0);
     const [amount, setAmount] = useState('');
     const [transactions, setTransactions] = useState([]);
+    const [walletExists, setWalletExists] = useState(true);
 
-    //auth check and data fetch
     useEffect(() => {
         const token = localStorage.getItem('token');
-        if(token){
+        if (token) {
             console.log('Token found, user is authenticated');
-            setIsAuth(true); //set auth to true to trigger data fetch
-        }
-    }, []); // dependency array ensures it only runs once
-
-    //data fetching effect
-    useEffect(() => {
-        if(isAuth){
-            console.log('Dashboard mounted, fetching data...');
+            setIsAuth(true);
             fetchData();
         }
-    }, [isAuth]); //dependency on isAuth
+    }, []); // Runs once on mount    
 
     const fetchData = async () => {
-        console.log('Attempting to fetch balance and transactions...');
         try {
-            const balanceData = await ewalletService.getBalance();
-            const transactionsData = await ewalletService.getTransactionHistory();
-
-            setBalance(Number(balanceData.balance) || 0); //ensure numeric value
-            console.log('Balance fetched:', balanceData);
-            setTransactions(transactionsData.transactions || []); //fallback to empty array if undefined
-            console.log('Transactions fetched:', transactionsData);
+            const response = await ewalletService.getBalance();
+            if(response.balance !== undefined){
+                setBalance(Number(response.balance));
+                setWalletExists(true);
+            }else{
+                setWalletExists(false);
+            }
         } catch (error) {
             console.error('Error fetching data:', error);
+            setWalletExists(false);
         }
     };
+
+    const handleCreateWallet = async () => {
+        try{
+            await ewalletService.createWallet();
+            fetchData();
+        }catch(error){
+            console.error('Error creating wallet:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const handleAmountChange = (e) => {
         setAmount(e.target.value);
@@ -101,20 +107,24 @@ const Dashboard = () => {
         <div className="dashboard">
             <h1>Dashboard</h1>
             <p>Welcome to your eWallet Dashboard!</p>
-            <div className="balance">
-                <h2>Your Balance:</h2>
-                <p>${balance.toFixed(2)}</p>
-            </div>
-            <div className="actions">
-                <input
-                    type="number"
-                    value={amount}
-                    onChange={handleAmountChange}
-                    placeholder="Enter amount"
-                />
-                <button onClick={addFunds}>Topup Funds</button>
-                <button onClick={subtractFunds}>Deduct Funds</button>
-            </div>
+            {walletExists ? (
+                <div className="balance">
+                    <h2>Your Balance:</h2>
+                    <p>${balance.toFixed(2)}</p>
+
+                    <div className='actions'>
+                        <input type="number" value={amount} onChange={handleAmountChange} placeholder="Enter amount" />
+                        <button onClick={addFunds}>Topup Funds</button>
+                        <button onClick={subtractFunds}>Deduct Funds</button>
+                    </div>
+                </div>
+
+            ) : (
+                <div>
+                    <p>You do not have a wallet yet...</p>
+                    <button onClick={handleCreateWallet}>Create Wallet</button>
+                </div>
+            )}
 
             <div className="recent-transactions">
                 <h3>Recent Transactions History</h3>

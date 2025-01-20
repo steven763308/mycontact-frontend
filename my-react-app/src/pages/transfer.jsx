@@ -16,6 +16,9 @@ const Transfer = () => {
             <h1>Transfer Funds</h1>
             <form onSubmit={handleTransfer}>
                 <div>
+                    <label>Funds Balance:</label>
+                </div>
+                <div>
                     <label>Amount:</label>
                     <input
                         type="number"
