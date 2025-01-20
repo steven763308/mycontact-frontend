@@ -40,7 +40,6 @@ export const authService = {
         console.log("Login response:", response); // Log response from login attempt
         if (response.data.accessToken) {
             localStorage.setItem("token", response.data.accessToken);
-            //console.log("Token stored:", response.data.accessToken); // Log token storage
             console.log("Token stored:", localStorage.getItem("token")); //log the token just been stored
         }
         return response.data;

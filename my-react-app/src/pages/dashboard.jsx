@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ewalletService from '../services/ewalletService';
+import TransactionHistory from '../components/TransactionHistory';
 import { use } from 'react';
 
 const Dashboard = () => {
@@ -41,7 +42,11 @@ const Dashboard = () => {
             fetchData();
         } catch (error) {
             console.error('Error creating wallet:', error);
-            alert('Error creating wallet. Please try again.');
+            if (error.response && error.response.data) {
+                alert(`Error creating wallet: ${error.response.data.message}`);
+            } else {
+                alert('Error creating wallet. Please try again.');
+            }
         }
     };
 
@@ -90,18 +95,6 @@ const Dashboard = () => {
         }
     };
 
-    const transferFunds = async (amount, recipientId) => {
-        console.log('Transferring funds:', amount, 'to recipient ID:', recipientId);
-        try {
-            const response = await ewalletService.transferFunds(amount, recipientId);
-            console.log('New balance after transferring funds:', response);
-            setBalance(response.data.newBalance);
-            fetchData();
-        } catch (error) {
-            console.error('Error transferring funds:', error);
-        }
-    };
-
     //const transactHistory
 
     return (
@@ -129,13 +122,9 @@ const Dashboard = () => {
 
             <div className="recent-transactions">
                 <h3>Recent Transactions History</h3>
-                <ul>
-                    {transactions.map((transaction, index) => (
-                        <li key={index}>
-                            {transaction.description} - ${transaction.amount.toFixed(2)}
-                        </li>
-                    ))}
-                </ul>
+                <div>
+                    {/* <TransactionHistory userId={userId}/> */}
+                </div>
             </div>
         </div>
     );

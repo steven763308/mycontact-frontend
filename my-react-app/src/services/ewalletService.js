@@ -28,9 +28,21 @@ axiosInstance.interceptors.request.use((config) => {
 
 //create wallet
 const createWallet = async () => {
-    const response = await axiosInstance.post(`/create`);
-    return response.data;
-}
+    try {
+        const userId = localStorage.getItem('userId'); // Retrieve the user ID from localStorage
+        if (!userId) {
+            throw new Error('User ID is not available');
+        }
+
+        const response = await axiosInstance.post(`/create`, {
+            userId: userId // Include the user ID in the request payload
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error creating wallet:', error);
+        throw error;
+    }
+};
 
 const getBalance = async () => {
     // Log to check if the token exists in localStorage at the time of request
@@ -86,8 +98,7 @@ const transferFunds = async (amount, recipientId) => {
         const response = await axiosInstance.post(`/transferFunds`, {amount, recipientId});
         return response.data; // The backend is expected to return the new balance
     } catch (error) {
-        console.error('Error transferring funds:', error);
-        throw error;
+        throw new Error(error.response.data.error || 'Error transferring funds, no wallet found');
     }
 };
 
@@ -95,13 +106,12 @@ const transferFunds = async (amount, recipientId) => {
  * Retrieve the user's transaction history.
  * @returns An array of transactions.
  */
-const getTransactionHistory = async () => {
+const getTransactionHistory = async (userId) => {
     try {
-        const response = await axiosInstance.get(`/transactions`);
-        return response.data; // The backend should return an array of transactions
+        const response = await axiosInstance.get(`/transactionHistory/${userId}`);
+        return response.data;
     } catch (error) {
-        console.error('Error fetching transaction history:', error);
-        throw error;
+        throw new Error(error.response.data.error || 'Error fetching transaction history');
     }
 };
 
