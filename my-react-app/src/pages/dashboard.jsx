@@ -36,11 +36,12 @@ const Dashboard = () => {
     };
 
     const handleCreateWallet = async () => {
-        try{
+        try {
             await ewalletService.createWallet();
             fetchData();
-        }catch(error){
+        } catch (error) {
             console.error('Error creating wallet:', error);
+            alert('Error creating wallet. Please try again.');
         }
     };
 

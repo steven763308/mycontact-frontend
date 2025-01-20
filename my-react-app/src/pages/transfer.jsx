@@ -1,23 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import ewalletService from '../services/ewalletService';
 
 const Transfer = () => {
     const [amount, setAmount] = useState('');
     const [recipient, setRecipient] = useState('');
     const [message, setMessage] = useState('');
+    const [balance, setBalance] = useState(0);
 
-    const handleTransfer = (e) => {
+    useEffect(() => {
+        const fetchBalance = async () => {
+            try {
+                const response = await ewalletService.getBalance();
+                setBalance(Number(response.balance)); // Ensure balance is a number
+            } catch (error) {
+                console.error('Error fetching balance:', error);
+            }
+        };
+
+        fetchBalance();
+    }, []);
+
+    const handleTransfer = async (e) => {
         e.preventDefault();
-        // Add your transfer logic here
-        setMessage(`Transferred ${amount} to ${recipient}`);
+        try {
+            const response = await ewalletService.transferFunds(amount, recipient);
+            setMessage(`Transferred ${amount} to ${recipient}`);
+            setBalance(Number(response.newBalance)); // Ensure new balance is a number
+        } catch (error) {
+            setMessage('Error transferring funds: ' + error.message);
+        }
     };
 
     return (
         <div>
             <h1>Transfer Funds</h1>
+            <div>
+                <label>Funds Balance:</label>
+                <p>${balance.toFixed(2)}</p>
+            </div>
             <form onSubmit={handleTransfer}>
-                <div>
-                    <label>Funds Balance:</label>
-                </div>
                 <div>
                     <label>Amount:</label>
                     <input

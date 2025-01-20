@@ -26,6 +26,12 @@ axiosInstance.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
+//create wallet
+const createWallet = async () => {
+    const response = await axiosInstance.post(`/create`);
+    return response.data;
+}
+
 const getBalance = async () => {
     // Log to check if the token exists in localStorage at the time of request
     const token = localStorage.getItem('token');
@@ -38,12 +44,6 @@ const getBalance = async () => {
     const response = await axiosInstance.get(`/balance`);
     return response.data;
 };
-
-//create wallet
-const createWallet = async () => {
-    const response = await axiosInstance.post(`/create`);
-    return response.data;
-}
 
 /**
  * Add funds to the user's e-wallet.
