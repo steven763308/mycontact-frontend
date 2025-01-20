@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import './navBar.css';
 
 const NavBar = () => {
     const location = useLocation(); // Hook to access the current route location

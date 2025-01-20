@@ -24,7 +24,7 @@ const Transfer = () => {
         e.preventDefault();
         try {
             const response = await ewalletService.transferFunds(amount, recipient);
-            setMessage(`Transferred ${amount} to ${recipient}`);
+            setMessage(`Transferred $${amount} to user_ID: ${recipient}`);
             setBalance(Number(response.newBalance)); // Ensure new balance is a number
         } catch (error) {
             setMessage('Error transferring funds: ' + error.message);
@@ -49,7 +49,7 @@ const Transfer = () => {
                     />
                 </div>
                 <div>
-                    <label>Recipient:</label>
+                    <label>Recipient U_ID:</label>
                     <input
                         type="text"
                         value={recipient}
