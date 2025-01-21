@@ -1,37 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import ewalletService from '../services/ewalletService';
-import TransactionHistory from '../components/TransactionHistory';
-import { use } from 'react';
+import React, { useState, useEffect } from "react";
+import ewalletService from "../services/ewalletService";
+import TransactionHistory from "../components/TransactionHistory";
 
 const Dashboard = () => {
-    //call api only after the token is stored
-    const [isAuth, setIsAuth] = useState(false); //state track auth status
-    const [balance, setBalance] = useState(0);
-    const [amount, setAmount] = useState('');
-    const [transactions, setTransactions] = useState([]);
-    const [walletExists, setWalletExists] = useState(true);
+    const [isAuth, setIsAuth] = useState(false); // Track authentication status
+    const [balance, setBalance] = useState(0); // Track wallet balance
+    const [amount, setAmount] = useState(""); // Input value for amounts
+    const [walletExists, setWalletExists] = useState(true); // Check if wallet exists
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (token) {
-            console.log('Token found, user is authenticated');
+            console.log("Token found, user is authenticated");
             setIsAuth(true);
             fetchData();
         }
-    }, []); // Runs once on mount    
+    }, []); // Run once on component mount
 
     const fetchData = async () => {
         try {
             const response = await ewalletService.getBalance();
-            if(response.balance !== undefined){
+            if (response?.balance !== undefined) {
                 setBalance(Number(response.balance));
                 setWalletExists(true);
-            }else{
+            } else {
                 setWalletExists(false);
             }
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error("Error fetching balance:", error);
             setWalletExists(false);
         }
     };
@@ -39,92 +35,80 @@ const Dashboard = () => {
     const handleCreateWallet = async () => {
         try {
             await ewalletService.createWallet();
-            fetchData();
+            fetchData(); // Refresh data after wallet creation
         } catch (error) {
-            console.error('Error creating wallet:', error);
-            if (error.response && error.response.data) {
-                alert(`Error creating wallet: ${error.response.data.message}`);
-            } else {
-                alert('Error creating wallet. Please try again.');
-            }
+            console.error("Error creating wallet:", error);
+            const errorMessage = error.response?.data?.message || "Error creating wallet. Please try again.";
+            alert(errorMessage);
         }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+    const handleAmountChange = (e) => setAmount(e.target.value);
 
-    const handleAmountChange = (e) => {
-        setAmount(e.target.value);
-    };
-
-    const validateAmount = (value) =>{
+    const validateAmount = (value) => {
         const num = Number(value);
         return !isNaN(num) && num > 0;
     };
 
     const addFunds = async () => {
         if (validateAmount(amount)) {
-            console.log('Adding funds:', amount);
             try {
-                const newBalance = await ewalletService.addFunds(Number(amount));
-                console.log('New balance after adding funds:', newBalance);
-                setBalance(Number(newBalance.balance) || balance);
+                const response = await ewalletService.addFunds(Number(amount));
+                setBalance(Number(response.balance) || balance);
                 fetchData(); // Refresh data
             } catch (error) {
-                console.error('Error adding funds:', error);
+                console.error("Error adding funds:", error);
             }
-        }else{
-            console.warn('Invalid amount entered.');
+        } else {
+            console.warn("Invalid amount entered.");
         }
     };
 
     const subtractFunds = async () => {
         if (validateAmount(amount)) {
-            console.log('Subtracting funds:', amount);
             try {
-                const newBalance = await ewalletService.subtractFunds(Number(amount));
-                console.log('New balance after subtracting funds:', newBalance);
-                setBalance(Number(newBalance.newBalance) || balance);
+                const response = await ewalletService.subtractFunds(Number(amount));
+                setBalance(Number(response.balance) || balance);
                 fetchData(); // Refresh data
             } catch (error) {
-                console.error('Error subtracting funds:', error);
+                console.error("Error subtracting funds:", error);
             }
-        }else{
-            console.warn('Invalid amount entered.');
+        } else {
+            console.warn("Invalid amount entered.");
         }
     };
-
-    //const transactHistory
 
     return (
         <div className="dashboard">
             <h1>Dashboard</h1>
             <p>Welcome to your eWallet Dashboard!</p>
+
             {walletExists ? (
-                <div className="balance">
-                    <h2>Your Balance:</h2>
+                <div className="balance-section">
+                    <h2>Your Balance</h2>
                     <p>${balance.toFixed(2)}</p>
 
-                    <div className='actions'>
-                        <input type="number" value={amount} onChange={handleAmountChange} placeholder="Enter amount" />
-                        <button onClick={addFunds}>Topup Funds</button>
-                        <button onClick={subtractFunds}>Deduct Funds</button>
+                    <div className="actions">
+                        <input
+                            type="number"
+                            value={amount}
+                            onChange={handleAmountChange}
+                            placeholder="Enter amount"
+                        />
+                        <button onClick={addFunds}>Add Funds</button>
+                        <button onClick={subtractFunds}>Subtract Funds</button>
                     </div>
                 </div>
-
             ) : (
-                <div>
-                    <p>You do not have a wallet yet...</p>
+                <div className="no-wallet">
+                    <p>You do not have a wallet yet.</p>
                     <button onClick={handleCreateWallet}>Create Wallet</button>
                 </div>
             )}
 
             <div className="recent-transactions">
-                <h3>Recent Transactions History</h3>
-                <div>
-                    {/* <TransactionHistory userId={userId}/> */}
-                </div>
+                <h3>Recent Transaction History</h3>
+                <TransactionHistory /> {/* Include the component for transaction history */}
             </div>
         </div>
     );
