@@ -3,11 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/api';
 import './login';
 
+
 const Login = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        email: '',
-        password: ''
+        email: 'steven1234@gmail.com',
+        password: '123'
     });
     const [error, setError] = useState('');
 

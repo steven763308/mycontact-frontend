@@ -29,7 +29,7 @@ axiosInstance.interceptors.request.use((config) => {
 //create wallet
 const createWallet = async () => {
     try {
-        const userId = localStorage.getItem('userId'); // Retrieve the user ID from localStorage
+        const userId = localStorage.getItem('token'); // Retrieve the user ID from localStorage
         if (!userId) {
             throw new Error('User ID is not available');
         }
